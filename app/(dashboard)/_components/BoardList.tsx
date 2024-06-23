@@ -22,7 +22,7 @@ export const BoardList = ({
     query
 }:BoardListProps) => {
 
-    const data = useQuery(api.boards.get, {orgId})
+    const data = useQuery(api.boards.get, { orgId })
 
     if(data === undefined){
         return (  
@@ -79,7 +79,7 @@ export const BoardList = ({
                     authorName={b.authorName}
                     createdAt={b._creationTime}
                     orgId={b.orgId}
-                    isFavorite={false}
+                    isFavorite={b.isFavorite}
                 />
             ))}
         </div>
