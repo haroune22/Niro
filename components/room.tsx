@@ -17,7 +17,7 @@ export function Room({
   fallback: NonNullable<ReactNode> | null 
 }) {
   return (
-    <LiveblocksProvider publicApiKey={"pk_dev_eugxl0Mm3eyLWek1itmiGRK0fRj2feO9AvTEAQQ9Qg_Fr2A8mXD7zv5BWvpvI3_a"}>
+    <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider id={roomId}>
         <ClientSideSuspense fallback={fallback}>
           {children}
