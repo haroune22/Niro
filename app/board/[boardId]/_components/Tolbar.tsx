@@ -1,5 +1,4 @@
-
-import React from 'react'
+"use client"
 
 export const Tolbar = () => {
   return (
@@ -17,9 +16,8 @@ export const Tolbar = () => {
   )
 }
 
-Tolbar.Skeleton = function InfoSkeleton(){
+export const TolbarSkeleton = () => {
   return (
     <div className='absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 bg-white h-[360px] w-[52px] shadow-md rounded-md'/>
-    
   )
 }
