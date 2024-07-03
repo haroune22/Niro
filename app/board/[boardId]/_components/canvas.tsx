@@ -1,25 +1,41 @@
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import { Info } from './Info'
 import { Participants } from './Participants'
-import { Tolbar } from './Tolbar'
-// import { useSelf } from '@liveblocks/react/suspense'
+import { Toolbar } from './Tolbar'
+import { CanvasMode, CanvasState } from '@/types/canvas'
+import { useHistory } from '@liveblocks/react/suspense'
+
+
 interface CanvasProps {
   boardId:string
-}
+};
+
+
 export const Canvas = ({
   boardId
 }:CanvasProps) => {
 
-  // const info = useSelf((me) => me.info);
-  // console.log(info)
+  const [canvasState,setCanvasState] = useState<CanvasState>({
+    mode: CanvasMode.None
+  })
+
+  const history = useHistory()
+
   return (
     <main 
         className='h-full w-full relative bg-neutral-100 touch-none'
     >
         <Info boardId={boardId} />
         <Participants/>
-        <Tolbar/>
+        <Toolbar 
+            canvaState={canvasState}
+            canRedo={false}
+            canUndo={false}
+            setCanvasState={setCanvasState}
+            redo={()=>{}}
+            undo={()=>{}}
+          />
     </main>
   )
 }

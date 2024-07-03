@@ -2,8 +2,27 @@
 
 import { Circle, MousePointer2, Pencil, Redo2, Square, StickyNote, Type, Undo, Undo2 } from "lucide-react"
 import { ToolButton } from "./ToolButton"
+import { CanvasState } from "@/types/canvas";
 
-export const Tolbar = () => {
+
+interface ToolbarProps {
+  canvaState: CanvasState;
+  setCanvasState: (newState: CanvasState) => void;
+  undo: ()=> void;
+  redo: ()=> void;
+  canUndo: boolean;
+  canRedo: boolean;
+};
+
+
+export const Toolbar = ({
+    canRedo,
+    canUndo,
+    canvaState,
+    redo,
+    setCanvasState,
+    undo
+}: ToolbarProps) => {
   return (
     <div className='absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 '>
         <div className="bg-white rounded-md p-1.5 flex gap-y-1 flex-col items-center shadow-md">
