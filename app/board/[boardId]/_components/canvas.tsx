@@ -4,7 +4,7 @@ import { Info } from './Info'
 import { Participants } from './Participants'
 import { Toolbar } from './Tolbar'
 import { CanvasMode, CanvasState } from '@/types/canvas'
-import { useHistory } from '@liveblocks/react/suspense'
+import { useHistory, useCanRedo, useCanUndo } from '@liveblocks/react/suspense'
 
 
 interface CanvasProps {
@@ -21,6 +21,8 @@ export const Canvas = ({
   })
 
   const history = useHistory()
+  const canUndo = useCanUndo()
+  const canRedo = useCanRedo()
 
   return (
     <main 
@@ -30,11 +32,11 @@ export const Canvas = ({
         <Participants/>
         <Toolbar 
             canvaState={canvasState}
-            canRedo={false}
-            canUndo={false}
+            canRedo={canRedo}
+            canUndo={canUndo}
             setCanvasState={setCanvasState}
-            redo={()=>{}}
-            undo={()=>{}}
+            redo={history.redo}
+            undo={history.undo}
           />
     </main>
   )
