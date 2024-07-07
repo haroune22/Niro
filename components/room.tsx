@@ -17,7 +17,7 @@ export function Room({
   fallback: NonNullable<ReactNode> | null 
 }) {
   return (
-    <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
+    <LiveblocksProvider throttle={16} authEndpoint="/api/liveblocks-auth">
       <RoomProvider initialPresence={{cursor:null}} id={roomId}>
         <ClientSideSuspense fallback={fallback}>
           {children}

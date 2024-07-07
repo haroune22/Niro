@@ -2,7 +2,7 @@
 
 import { useOthers , useSelf } from "@liveblocks/react/suspense"
 import { UserAvatar } from "./userAvatar"
-import { connectioIdtoColor } from "@/lib/utils";
+import { connectionIdtoColor } from "@/lib/utils";
 
 const MAX_SHOWN_USERS = 2;
 
@@ -18,7 +18,7 @@ export const Participants = () => {
           {users.slice(0, MAX_SHOWN_USERS).map(({connectionId, info}) => {
             return (
               <UserAvatar
-                borderColor={connectioIdtoColor(connectionId)}
+                borderColor={connectionIdtoColor(connectionId)}
                 fallback={info?.name?.[0] || "T"}
                 key={connectionId}
                 name={info?.name}
@@ -28,7 +28,7 @@ export const Participants = () => {
           })}
           {currentUser && (
               <UserAvatar
-                borderColor={connectioIdtoColor(currentUser.connectionId)}
+                borderColor={connectionIdtoColor(currentUser.connectionId)}
                 fallback={currentUser?.info?.name?.[0] || "T"}
                 key={currentUser?.connectionId}
                 name={currentUser?.info?.name}
