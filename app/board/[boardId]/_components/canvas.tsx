@@ -4,7 +4,13 @@ import { Info } from './Info'
 import { Participants } from './Participants'
 import { Toolbar } from './Tolbar'
 import { CanvasMode, CanvasState } from '@/types/canvas'
-import { useHistory, useCanRedo, useCanUndo } from '@liveblocks/react/suspense'
+import { 
+  useHistory, 
+  useCanRedo, 
+  useCanUndo,
+  useMutation
+} from '@liveblocks/react/suspense'
+import { CusrsorsPresence } from './CusrsorsPresence'
 
 
 interface CanvasProps {
@@ -20,9 +26,15 @@ export const Canvas = ({
     mode: CanvasMode.None
   })
 
-  const history = useHistory()
-  const canUndo = useCanUndo()
-  const canRedo = useCanRedo()
+  const history = useHistory();
+  const canUndo = useCanUndo();
+  const canRedo = useCanRedo();
+
+  const onPointerMove = useMutation(({ setMyPresence }, e: React.PointerEvent) => {
+    e.preventDefault()
+    const current = { x: 0, y: 0 }
+    setMyPresence({cursor: current})
+  },[]);
 
   return (
     <main 
@@ -38,6 +50,11 @@ export const Canvas = ({
             redo={history.redo}
             undo={history.undo}
           />
+          <svg className='h-[100vh] w-[100vw] '>
+            <g>
+              <CusrsorsPresence />
+            </g>
+          </svg>
     </main>
   )
 }

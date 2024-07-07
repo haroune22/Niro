@@ -18,7 +18,7 @@ export function Room({
 }) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
-      <RoomProvider id={roomId}>
+      <RoomProvider initialPresence={{cursor:null}} id={roomId}>
         <ClientSideSuspense fallback={fallback}>
           {children}
         </ClientSideSuspense>
