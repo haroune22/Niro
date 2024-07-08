@@ -24,6 +24,7 @@ import { Info } from './Info'
 import { Participants } from './Participants'
 import { Toolbar } from './Tolbar'
 import { LiveObject } from '@liveblocks/client'
+import { LayerPreview } from './LayerPreview'
 
 
 
@@ -62,27 +63,28 @@ export const Canvas = ({
     position: Point,
   ) => {
 
-    const liveLayers = storage.get('layers')
-    if(liveLayers.size >= MAX_LAYERS){
-      return;
-    }
+      const liveLayers = storage.get('layers')
+      if(liveLayers.size >= MAX_LAYERS){
+        return;
+      }
 
-    const liveLayerIds = storage.get('layerIds');
-    const layerId = nanoid();
-    const layer = new LiveObject({
-      type: layerType,
-      x: position.x,
-      y: position.y,
-      height: 100,
-      width: 100,
-      fill: lastUsedColor,
-    });
-    
-    liveLayerIds.push(layerId);
-    liveLayers.set(layerId, layer);
+      const liveLayerIds = storage.get('layerIds');
+      const layerId = nanoid();
+      
+      const layer = new LiveObject({
+        type: layerType,
+        x: position.x,
+        y: position.y,
+        height: 100,
+        width: 100,
+        fill: lastUsedColor,
+      });
+      
+      liveLayerIds.push(layerId);
+      liveLayers.set(layerId, layer);
 
-    setMyPresence({ selection: [layerId]}, { addToHistory: true } );
-    setCanvasState({ mode: CanvasMode.None });
+      setMyPresence({ selection: [layerId]}, { addToHistory: true } );
+      setCanvasState({ mode: CanvasMode.None });
 
   },[lastUsedColor]);
   
@@ -110,6 +112,27 @@ export const Canvas = ({
     setMyPresence({cursor: null});
   },[]);
 
+  const onPointerUp = useMutation((
+    {},
+    e
+  )=> {
+
+    const point = pointerEventToCanvasPoint(e,camera);
+    // console.log({point,mode:canvasState.mode})
+
+    if(canvasState.mode === CanvasMode.Inserting) {
+      insertLayer(canvasState.layerType, point)
+    } else {
+      setCanvasState({
+        mode: CanvasMode.None
+      })
+    };
+    history.resume()
+
+  },[camera, canvasState, history, insertLayer]);
+
+
+
   return (
     <main 
         className='h-full w-full relative bg-neutral-100 touch-none'
@@ -129,8 +152,17 @@ export const Canvas = ({
           onPointerMove={onPointerMove} 
           onPointerLeave={onPointerLeave}
           className='h-[100vh] w-[100vw]'
+          onPointerUp={onPointerUp}
         >
           <g style={{ transform: `translate(${camera.x}px, ${camera.y}px)` }}>
+          {layerIds.map((layerId)=> (
+            <LayerPreview
+              key={layerId}
+              id={layerId}
+              onLayerPointerDown={()=>{}}
+              selectionColor="#000"
+            />
+          ))}
             <CusrsorsPresence />
           </g>
         </svg>
