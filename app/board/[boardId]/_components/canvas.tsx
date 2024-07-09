@@ -26,6 +26,7 @@ import { Participants } from './Participants'
 import { Toolbar } from './Tolbar'
 import { LiveObject } from '@liveblocks/client'
 import { LayerPreview } from './LayerPreview'
+import { SelectionBox } from './SelectionBox'
 
 
 
@@ -205,7 +206,10 @@ export const Canvas = ({
               selectionColor={layerIdsToColorSelection[layerId]}
             />
           ))}
-            <CusrsorsPresence />
+          <SelectionBox 
+            onResizeHandlePointerDown={()=>{}}
+          />
+          <CusrsorsPresence />
           </g>
         </svg>
     </main>
