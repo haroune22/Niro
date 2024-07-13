@@ -29,6 +29,7 @@ import { Toolbar } from './Tolbar'
 import { Participants } from './Participants'
 import { LayerPreview } from './LayerPreview'
 import { SelectionBox } from './SelectionBox'
+import { SelectionTools } from './SelectionTools'
 
 
 
@@ -292,6 +293,10 @@ export const Canvas = ({
             setCanvasState={setCanvasState}
             redo={history.redo}
             undo={history.undo}
+          />
+          <SelectionTools 
+            camera={camera}
+            setLastUsedColor={setLastUsedColor}
           />
         <svg 
           onWheel={onWheel}
