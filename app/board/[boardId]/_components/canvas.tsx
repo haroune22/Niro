@@ -23,7 +23,7 @@ import { nanoid } from "nanoid"
 import { LiveObject } from '@liveblocks/client'
 
 import { CusrsorsPresence } from './CusrsorsPresence'
-import { connectionIdtoColor, findIntersectingLayersWithRectangles, pointerEventToCanvasPoint, ResizeBounds } from '@/lib/utils'
+import { connectionIdtoColor, findIntersectingLayersWithRectangles, penPointsTToPathLayer, pointerEventToCanvasPoint, ResizeBounds } from '@/lib/utils'
 import { Info } from './Info'
 import { Toolbar } from './Tolbar'
 import { Participants } from './Participants'
@@ -133,6 +133,81 @@ export const Canvas = ({
     }
   },[]);
 
+  const startDrowing  = useMutation((
+    { setMyPresence },
+    point: Point,
+    pressure: number
+  ) => {
+
+    setMyPresence({
+      pencilDraft: [[point.x, point.y, pressure]],
+      penColor: lastUsedColor,
+    })
+
+  }, [lastUsedColor]);
+
+
+   const continueDrowing = useMutation((
+    { self, setMyPresence },
+    point:Point,
+    e:React.PointerEvent
+   )=> {
+
+    const { pencilDraft } = self.presence
+
+    if(
+      canvasState.mode !== CanvasMode.Pencil ||
+      e.button !== 1 ||
+      pencilDraft === null
+    ){
+      return ;
+    }
+
+    setMyPresence({
+      cursor: point,
+      pencilDraft:
+        pencilDraft.length === 1 &&
+        pencilDraft[0][0] === point.x &&
+        pencilDraft[0][1] === point.y 
+          ? pencilDraft
+          : [...pencilDraft, [point.x, point.y, e.pressure]]
+    })
+
+   }, [canvasState.mode]);
+
+   const insertPath = useMutation((
+    { storage, self, setMyPresence },
+   )=> {
+
+    const liveLayers = storage.get('layers')
+    const { pencilDraft } = self.presence;
+
+   if(
+    pencilDraft == null ||
+    pencilDraft.length < 2 ||
+    liveLayers.size >= MAX_LAYERS
+   ){
+    setMyPresence({pencilDraft: null})
+    return;
+   }
+    
+   const id = nanoid()
+   liveLayers.set(
+    id,
+    new LiveObject(penPointsTToPathLayer(
+      pencilDraft,
+      lastUsedColor,
+    ))
+   );
+
+   const liveLayerIds = storage.get('layerIds');
+
+   liveLayerIds.push(id)
+   setMyPresence({pencilDraft: null})
+   setCanvasState({ mode: CanvasMode.Pencil})
+
+   },[canvasState.mode, lastUsedColor])
+
   const resizeSelectedLayer = useMutation((
     { storage, self },
     point: Point,
@@ -220,11 +295,13 @@ export const Canvas = ({
       translateSelectedLayers(current)
     } else if(canvasState.mode === CanvasMode.Resizing) {
       resizeSelectedLayer(current)
-    };
+    } else if(canvasState.mode === CanvasMode.Pencil){
+      continueDrowing(current, e)
+    }
 
     setMyPresence({cursor: current});
 
-  },[canvasState, , resizeSelectedLayer, camera, translateSelectedLayers]);
+  },[canvasState, , resizeSelectedLayer, camera, translateSelectedLayers, continueDrowing, startMultiSelection, updateSelectionNet]);
 
 
   const onPointerLeave = useMutation(({ setMyPresence }) => {
@@ -239,8 +316,14 @@ export const Canvas = ({
       return ;
     };
 
+    if(canvasState.mode === CanvasMode.Pencil){
+      // console.log("drowing");
+      startDrowing(point, e.pressure) ;
+    };
+
+
     setCanvasState({ origin: point , mode: CanvasMode.Pressing})
-  },[canvasState.mode, camera, setCanvasState])
+  },[canvasState.mode, camera, setCanvasState, startDrowing])
 
   const onPointerUp = useMutation((
     {},
@@ -256,7 +339,9 @@ export const Canvas = ({
     ) {
       unselectLayers()
       setCanvasState({ mode: CanvasMode.None})
-    }else if(canvasState.mode === CanvasMode.Inserting) {
+    }else if(canvasState.mode === CanvasMode.Pencil){
+      insertPath();
+    } else if(canvasState.mode === CanvasMode.Inserting) {
       insertLayer(canvasState.layerType, point)
     } else {
       setCanvasState({
@@ -265,7 +350,7 @@ export const Canvas = ({
     };
     history.resume()
 
-  },[camera, canvasState, history, insertLayer, unselectLayers]);
+  },[setCanvasState, camera, canvasState, history, insertLayer, unselectLayers, insertPath]);
 
   const selections = useOthersMapped((other) => other.presence.selection);
 
