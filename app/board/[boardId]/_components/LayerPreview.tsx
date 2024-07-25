@@ -7,6 +7,8 @@ import { Rectangle } from "./Rectangle"
 import { Ellipse } from "./Ellipse"
 import { Text } from "./Text"
 import { Note } from "./Note"
+import { Path } from "./Path"
+import { colorToCss } from "@/lib/utils"
 
 
 
@@ -35,6 +37,18 @@ export const LayerPreview = memo(({
     };
 
     switch(layer.type){
+        case LayerType.Path:
+            return (
+                    <Path
+                        key={id}
+                        points={layer.points}
+                        onPointerDown={(e) =>onLayerPointerDown(e, id)}
+                        stroke={selectionColor}
+                        x={layer.x}
+                        y={layer.y}
+                        fill={layer.fill ? colorToCss(layer.fill) : "#000"}
+                    />
+            );
         case LayerType.Ellipse:
             return (
                 <>
@@ -48,7 +62,7 @@ export const LayerPreview = memo(({
             );
         case LayerType.Text:
             return (
-                <>
+                <>J
                     <Text
                         id={id}
                         layer={layer}
