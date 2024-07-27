@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { 
   Camera, 
   CanvasMode, 
@@ -17,19 +17,23 @@ import {
   useCanUndo,
   useMutation,
   useStorage,
-  useOthersMapped
+  useOthersMapped,
+  useSelf
 } from '@liveblocks/react/suspense'
 import { nanoid } from "nanoid"
 import { LiveObject } from '@liveblocks/client'
 
 import { CusrsorsPresence } from './CusrsorsPresence'
-import { connectionIdtoColor, findIntersectingLayersWithRectangles, penPointsTToPathLayer, pointerEventToCanvasPoint, ResizeBounds } from '@/lib/utils'
+import { colorToCss, connectionIdtoColor, findIntersectingLayersWithRectangles, penPointsTToPathLayer, pointerEventToCanvasPoint, ResizeBounds } from '@/lib/utils'
 import { Info } from './Info'
 import { Toolbar } from './Tolbar'
 import { Participants } from './Participants'
 import { LayerPreview } from './LayerPreview'
 import { SelectionBox } from './SelectionBox'
 import { SelectionTools } from './SelectionTools'
+import { Path } from './Path'
+import { useDisableScrollBounce } from '@/hooks/use-disable-scroll-bounce'
+import { useDeleteLayers } from '@/hooks/use-delete-layers'
 
 
 
@@ -52,12 +56,15 @@ export const Canvas = ({
 
   const [camera,setCamera] = useState<Camera>({x:0, y:0});
 
+  const pencilDraft = useSelf((me) => me.presence.pencilDraft)
+
   const [lastUsedColor,setLastUsedColor] = useState<Color>({
     r:255,
     g:255,
     b:255,
   });
 
+  useDisableScrollBounce();
   const history = useHistory();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
@@ -173,7 +180,7 @@ export const Canvas = ({
       return;
     }
   
-    console.log('Continuing drawing with point:', point);
+    // console.log('Continuing drawing with point:', point);
   
     setMyPresence({
       cursor: point,
@@ -412,6 +419,33 @@ export const Canvas = ({
 
   },[selections])
 
+  const deleteLayers = useDeleteLayers()
+
+  useEffect(()=>{
+    function onKeyDown(e: KeyboardEvent){
+      switch (e.key){
+        case "z": {
+          if(e.ctrlKey || e.metaKey){
+            if(e.shiftKey){ 
+              history.redo()
+            } else{
+              history.undo()
+            }
+            break;
+          }
+        }
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    
+    return()=> {
+      document.removeEventListener('keydown', onKeyDown)
+    }
+
+  }, [deleteLayers, history])
+  
+
+
   return (
     <main 
         className='h-full w-full relative bg-neutral-100 touch-none'
@@ -460,6 +494,14 @@ export const Canvas = ({
             />
           )}
           <CusrsorsPresence />
+          {pencilDraft != null && pencilDraft.length > 0 && (
+            <Path 
+              points={pencilDraft}
+              fill={colorToCss(lastUsedColor)}
+              x={0}
+              y={0}
+            />
+          )}
           </g>
         </svg>
     </main>
